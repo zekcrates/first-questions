@@ -1,0 +1,31 @@
+{
+    "embedder": {
+        "client_class": "OpenAIClient",
+        "batch_size": 500,
+        "model_kwargs": {
+            "model": "text-embedding-3-small"
+        }
+    },
+    "embedder_google": {
+        "client_class": "GoogleGenAIClient",
+        "batch_size": 100,
+        "model_kwargs": {
+            "model": "text-embedding-004"
+        }
+    },
+    "embedder_ollama": {
+        "client_class": "OllamaClient",
+        "batch_size": 32,
+        "model_kwargs": {
+            "model": "nomic-embed-text"
+        }
+    },
+    "retriever": {
+        "top_k": 20
+    },
+    "text_splitter": {
+        "split_by": "word",
+        "chunk_size": 350,
+        "chunk_overlap": 100
+    }
+}

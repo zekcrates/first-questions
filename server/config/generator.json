@@ -1,0 +1,70 @@
+{
+    "default_provider": "google",
+    "providers": {
+        "google": {
+            "default_model": "gemini-2.5-flash",
+            "supportsCustomModel": true,
+            "models": {
+                "gemini-2.5-flash": {
+                    "temperature": 0.7,
+                    "top_p": 0.8
+                },
+                "gemini-2.5-pro": {
+                    "temperature": 0.7,
+                    "top_p": 0.8
+                }
+            }
+        },
+        "openai": {
+            "default_model": "gpt-4o-mini",
+            "supportsCustomModel": true,
+            "models": {
+                "gpt-4o-mini": {
+                    "temperature": 0.7,
+                    "top_p": 0.8
+                },
+                "gpt-4o": {
+                    "temperature": 0.7,
+                    "top_p": 0.8
+                },
+                "o3-mini": {
+                    "temperature": 1.0
+                }
+            }
+        },
+        "ollama": {
+            "default_model": "llama3:8b",
+            "supportsCustomModel": true,
+            "models": {
+                "llama3:8b": {
+                    "options": {
+                        "temperature": 0.7,
+                        "top_p": 0.8,
+                        "num_ctx": 8000
+                    }
+                },
+                "deepseek-r1": {
+                    "options": {
+                        "temperature": 0.6,
+                        "top_p": 0.95,
+                        "num_ctx": 16000
+                    }
+                }
+            }
+        },
+        "openrouter": {
+            "default_model": "anthropic/claude-3.5-sonnet",
+            "supportsCustomModel": true,
+            "models": {
+                "anthropic/claude-3.5-sonnet": {
+                    "temperature": 0.7,
+                    "top_p": 0.8
+                },
+                "deepseek/deepseek-r1": {
+                    "temperature": 0.6,
+                    "top_p": 0.95
+                }
+            }
+        }
+    }
+}
