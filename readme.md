@@ -1,6 +1,8 @@
 # FewQuestions
 
-Ask questions about a GitHub repo to actively understand it — instead of passively reading the code.
+Get few questions about a repo that can be tested to actively understand a codebase rather than
+reading theory about it .
+
 
 - **Client:** React + Vite + Tailwind CSS (`client/`)
 - **Server:** FastAPI + adalflow RAG (`server/`)
