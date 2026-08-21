@@ -156,12 +156,12 @@ function IndexPanel({ repo }) {
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold tracking-tight text-gray-950">
-                {phase === 'preparing' ? `Indexing ${repo.owner}/${repo.name}` : 'Crafting hypotheses'}
+                {phase === 'preparing' ? `Indexing ${repo.owner}/${repo.name}` : 'Crafting questions'}
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-gray-500">
                 {phase === 'preparing'
                   ? 'Cloning and embedding the codebase. First run takes a bit — next time it’s instant from cache.'
-                  : 'Turning the indexed code into 30–40 testable hypotheses for you.'}
+                  : 'Turning the indexed code into 30–40 questions for you.'}
               </p>
             </div>
             <span className="hidden sm:inline-flex items-center rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500 ring-1 ring-inset ring-gray-200">
@@ -340,15 +340,12 @@ function Home({ onOpenRepo }) {
               <svg className="size-4" viewBox="0 0 20 20" fill="none"><path d="M3 10h12M10 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </button>
           </div>
-          <p className="mt-3 text-sm text-gray-500">Paste a full GitHub URL or owner/repo and press enter.</p>
         </form>
       </section>
 
       {cached.length > 0 && (
         <section className="pb-10">
-          <h3 className="text-sm font-semibold tracking-tight text-gray-900">Recent repos — tap to open</h3>
-          <p className="mt-1 text-xs text-gray-500">Already indexed on this server — questions are instant from cache.</p>
-          <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             {cached.map((r) => (
               <button
                 key={r.slug}
@@ -358,15 +355,7 @@ function Home({ onOpenRepo }) {
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-semibold text-white">
                   {r.owner[0].toUpperCase()}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-gray-900">{r.owner}/{r.name}</div>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium ring-1 ring-inset ${r.indexed ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
-                      {r.indexed ? 'indexed' : 'not indexed'}
-                    </span>
-                    {r.has_questions && <span className="text-gray-500">• 40 questions cached</span>}
-                  </div>
-                </div>
+                <div className="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{r.owner}/{r.name}</div>
                 <svg className="size-4 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="none"><path d="M7 10h8M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
             ))}
