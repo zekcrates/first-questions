@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { prepareRepo, fetchQuestions } from './api'
+import { useEffect, useRef, useState } from 'react'
+import { fetchRepos, prepareRepo, fetchQuestions } from './api'
 
 function parseRepo(input) {
   const slug = input.trim().replace(/^https?:\/\/(www\.)?github\.com\//, '').replace(/\/$/, '')
@@ -205,19 +205,16 @@ function IndexPanel({ repo }) {
       {phase === 'done' && (
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50/50 px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                <svg className="size-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clipRule="evenodd" /></svg>
-              </span>
-              <h3 className="text-sm font-semibold tracking-tight text-gray-950">Ready to investigate</h3>
-              <span className="hidden sm:inline-flex items-center rounded-full bg-white px-2.5 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-200">{questions.length} hypotheses</span>
-            </div>
-            <span className="text-xs text-gray-400 hidden sm:block">Tap a hypothesis to test it in code</span>
+            <h3 className="text-sm font-semibold tracking-tight text-gray-950">{questions.length} questions</h3>
+            <span className="text-xs text-gray-400">
+              {page * pageSize + 1}–{Math.min((page + 1) * pageSize, questions.length)} of {questions.length}
+            </span>
           </div>
 
           {questions.length > 0 ? (
-            <ul className="divide-y divide-gray-100">
-              {questions.map((q) => (
+            <>
+              <ul className="divide-y divide-gray-100">
+                {paged.map((q) => (
                 <li key={q.id} className="group px-6 py-4 hover:bg-gray-50/70 transition-colors">
                   <div className="flex gap-4">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-semibold text-white shadow-sm">
@@ -245,8 +242,30 @@ function IndexPanel({ repo }) {
                 </li>
               ))}
             </ul>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/30 px-6 py-3">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Previous
+                </button>
+                <span className="text-xs text-gray-500">Page {page + 1} of {totalPages}</span>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page + 1 >= totalPages}
+                  className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+            </>
           ) : (
-            <p className="px-6 py-8 text-center text-sm text-gray-500">No hypotheses returned.</p>
+            <p className="px-6 py-8 text-center text-sm text-gray-500">No questions returned.</p>
           )}
         </div>
       )}
@@ -275,7 +294,25 @@ function RepoPage({ repo }) {
 
 function Home({ onOpenRepo }) {
   const [query, setQuery] = useState('')
+  const [cached, setCached] = useState([])
+  const [loadingCached, setLoadingCached] = useState(true)
   const inputRef = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchRepos()
+      .then((res) => {
+        if (!cancelled) setCached(res.repos || [])
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoadingCached(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const repo = parseRepo(query)
@@ -284,6 +321,7 @@ function Home({ onOpenRepo }) {
       onOpenRepo(repo)
     }
   }
+
   return (
     <main className="mx-auto max-w-3xl px-6">
       <section className="pt-16 pb-8 text-center">
@@ -305,6 +343,39 @@ function Home({ onOpenRepo }) {
           <p className="mt-3 text-sm text-gray-500">Paste a full GitHub URL or owner/repo and press enter.</p>
         </form>
       </section>
+
+      {cached.length > 0 && (
+        <section className="pb-10">
+          <h3 className="text-sm font-semibold tracking-tight text-gray-900">Recent repos — tap to open</h3>
+          <p className="mt-1 text-xs text-gray-500">Already indexed on this server — questions are instant from cache.</p>
+          <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            {cached.map((r) => (
+              <button
+                key={r.slug}
+                onClick={() => onOpenRepo({ owner: r.owner, name: r.name })}
+                className="flex w-full items-center gap-4 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
+              >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-semibold text-white">
+                  {r.owner[0].toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-gray-900">{r.owner}/{r.name}</div>
+                  <div className="mt-0.5 flex items-center gap-2 text-xs">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium ring-1 ring-inset ${r.indexed ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}`}>
+                      {r.indexed ? 'indexed' : 'not indexed'}
+                    </span>
+                    {r.has_questions && <span className="text-gray-500">• 40 questions cached</span>}
+                  </div>
+                </div>
+                <svg className="size-4 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="none"><path d="M7 10h8M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {loadingCached && cached.length === 0 && <div className="pb-10 text-center text-xs text-gray-400">Checking cached repos…</div>}
+
       <section className="border-t border-gray-100 pb-24 pt-12 text-center">
         <h2 className="text-xl font-semibold text-gray-950">What is FewQuestions?</h2>
         <p className="mx-auto mt-3 max-w-lg text-[15px] text-gray-500">FewQuestions gives you 30-40 testable hypotheses to actively investigate a repo, rather than passively reading it.</p>

@@ -34,3 +34,12 @@ export function fetchQuestions({ repoUrl, language = 'en', provider, model, forc
     signal,
   });
 }
+
+/**
+ * List cached repos (indexed + has_questions) for Home one-click access.
+ * @param {{ signal?: AbortSignal }} opts
+ * @returns {Promise<{repos: Array<{owner:string,name:string,repo_url:string,slug:string,indexed:boolean,has_questions:boolean}>}>}
+ */
+export function fetchRepos({ signal } = {}) {
+  return apiFetch('/api/repos', { signal });
+}
