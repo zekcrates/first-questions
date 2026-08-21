@@ -21,22 +21,11 @@ function Logo({ onClick }) {
   )
 }
 
-function Nav({ onHome, onAdd, disabled }) {
+function Nav({ onHome, disabled }) {
   return (
     <nav className="sticky top-0 z-10 border-b border-gray-100 bg-white">
       <div className="mx-auto flex h-20 max-w-screen-xl items-center px-6">
         <Logo onClick={onHome} />
-        <button
-          type="button"
-          onClick={onAdd}
-          disabled={disabled}
-          className="ml-auto inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <svg className="size-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-          </svg>
-          Add repo
-        </button>
       </div>
     </nav>
   )
@@ -107,6 +96,33 @@ function IndexPanel({ repo }) {
   const isBusy = phase === 'preparing' || phase === 'generating'
   const totalPages = Math.max(1, Math.ceil(questions.length / pageSize))
   const paged = questions.slice(page * pageSize, (page + 1) * pageSize)
+
+  // auto-load if this repo already has cached questions (so recent repos open straight to questions)
+  useEffect(() => {
+    let cancelled = false
+    fetchRepos()
+      .then((res) => {
+        const slug = `${repo.owner}/${repo.name}`.toLowerCase()
+        const found = (res.repos || []).find((r) => r.slug.toLowerCase() === slug)
+        if (found && found.has_questions && !cancelled) {
+          setPhase('generating')
+          fetchQuestions({ repoUrl })
+            .then((r) => {
+              if (cancelled) return
+              setQuestions(r.questions || [])
+              setPage(0)
+              setPhase('done')
+            })
+            .catch(() => {
+              if (!cancelled) setPhase('idle')
+            })
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [repo.owner, repo.name])
 
   const start = async () => {
     if (isBusy) return
@@ -182,7 +198,7 @@ function IndexPanel({ repo }) {
               <span className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1 ${phase === 'generating' ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-400 ring-gray-200'}`}>
                 {phase === 'generating' ? <Spinner className="size-3.5" /> : '2'}
               </span>
-              <span className={`text-sm ${phase === 'generating' ? 'font-medium text-gray-900' : 'text-gray-400'}`}>Craft 30–40 hypotheses</span>
+              <span className={`text-sm ${phase === 'generating' ? 'font-medium text-gray-900' : 'text-gray-400'}`}>Craft 30–40 questions</span>
               <span className="ml-auto hidden sm:block text-xs text-gray-400">~30s</span>
             </div>
           </div>
@@ -367,7 +383,7 @@ function Home({ onOpenRepo }) {
 
       <section className="border-t border-gray-100 pb-24 pt-12 text-center">
         <h2 className="text-xl font-semibold text-gray-950">What is FewQuestions?</h2>
-        <p className="mx-auto mt-3 max-w-lg text-[15px] text-gray-500">FewQuestions gives you 30-40 testable hypotheses to actively investigate a repo, rather than passively reading it.</p>
+        <p className="mx-auto mt-3 max-w-lg text-[15px] text-gray-500">FewQuestions gives you 30-40 Questions to actively investigate a repo, rather than passively reading it.</p>
       </section>
     </main>
   )
@@ -378,7 +394,7 @@ function App() {
   const [showAdd, setShowAdd] = useState(false)
   const openRepo = (repo) => setCurrent(repo)
   const goHome = () => setCurrent(null)
-  const isBusyOnRepoPage = false // App-level nav stays enabled; IndexPanel disables its own button while busy
+  const isBusyOnRepoPage = false 
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
