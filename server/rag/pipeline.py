@@ -24,13 +24,14 @@ class EmbedderType(Enum):
     OPENAI = auto()
     ANTHROPIC = auto() 
     GOOGLE = auto()
+    LOCAL = auto()
 
 def count_tokens(text: str, embedder_type: EmbedderType| None = None ):
     try:
         if embedder_type is None:
             # get embedded from config 
             pass 
-        SAME_ENCODINGS = {EmbedderType.OLLAMA, EmbedderType.GOOGLE, EmbedderType.ANTHROPIC}
+        SAME_ENCODINGS = {EmbedderType.OLLAMA, EmbedderType.GOOGLE, EmbedderType.ANTHROPIC, EmbedderType.LOCAL}
 
         if embedder_type in SAME_ENCODINGS:
             encoding = tiktoken.get_encoding("cl100k_base")
@@ -48,6 +49,16 @@ def get_repo_db(repo: Repo)-> str:
         raise ValueError(f"Repo root path is empty: {repo}")
     save_db_file = os.path.join(repo.root_path, "databases", f"{repo.name}.pkl")
     return save_db_file
+
+
+def get_repo_questions_path(repo: Repo, language: str = "en") -> str:
+    if not repo.root_path:
+        raise ValueError(f"Repo root path is empty: {repo}")
+    if not repo.name:
+        raise ValueError(f"Repo name is empty: {repo}")
+    lang = (language or "en").lower().strip() or "en"
+    # same databases folder as the index — file is our DB (no real DB needed)
+    return os.path.join(repo.root_path, "databases", f"{repo.name}__{lang}.questions.json")
 
 
 class LineTrackingTextSplitter(TextSplitter):

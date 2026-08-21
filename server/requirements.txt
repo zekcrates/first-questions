@@ -12,3 +12,7 @@ httpx
 ollama
 faiss-cpu
 google-generativeai
+python-dotenv
+sentence-transformers==6.0.0
+torch==2.13.0+cpu
+transformers==5.15.1

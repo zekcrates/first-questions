@@ -20,6 +20,14 @@
             "model": "nomic-embed-text"
         }
     },
+    "embedder_local": {
+        "client_class": "SentenceTransformerClient",
+        "batch_size": 32,
+        "model_kwargs": {
+            "model": "all-MiniLM-L6-v2",
+            "normalize_embeddings": true
+        }
+    },
     "retriever": {
         "top_k": 20
     },

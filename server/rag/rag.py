@@ -13,7 +13,7 @@ from adalflow.core.types import (
     RetrieverOutput,
     UserQuery,
 )
-from config import EMBEDDER_CONFIG, get_embedder, get_embedder_type
+from config import EMBEDDER_CONFIG, get_embedder, get_embedder_type, get_generator
 from repo import RepoType
 from rag.pipeline import RepoManager 
 
@@ -63,12 +63,22 @@ def _get_document_vector_size(document: Document)-> int :
     return embedding_size 
 
 class RAG(adal.Component):
-    def __init__(self, provider="google", model=None):  
-        self.provider = provider 
-        self.model = model 
+    def __init__(self, provider=None, model=None):
+        super().__init__()
+        # provider/model resolved from env/GENERATOR_CONFIG (defaults to google — free tier)
+        # generator is for QUESTIONS_GENERATOR_PROMPT (30-40 hypotheses), not Q&A
+        raw_provider = provider or os.getenv("LLM_PROVIDER") or os.getenv("GENERATOR_TYPE")
+        self.provider = (raw_provider or "google").lower() if raw_provider else "google"
+        self.model = model
         self.embedder_type = get_embedder_type()
         self.embedder = get_embedder(embedder_type=self.embedder_type)
         self.initialize_repo_manager()
+        try:
+            self.generator = get_generator(provider=self.provider, model=self.model)
+            self.model = self.generator.model_kwargs.get("model", self.model)
+        except Exception as e:
+            print(f"[RAG] LLM init skipped for provider '{self.provider}': {e}")
+            self.generator = None
 
     def initialize_repo_manager(self):
         self.repo_manager = RepoManager()

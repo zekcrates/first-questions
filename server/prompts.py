@@ -5,6 +5,10 @@ Your goal is to turn passive reading into an active investigation by generating 
 Language: Respond in {language_name}.
 </role>
 
+<context>
+{{context_str}}
+</context>
+
 <rules>
 1. Generate between 30-40 Unique,decent,simple Hypotheses based on the provided repository context.
 2. Mix True statements (actual implementations) and plausible False statements (common misconceptions, anti-patterns, or missing features).
@@ -20,12 +24,13 @@ Language: Respond in {language_name}.
 </rules>
 
 <output_format> 
+Return ONLY a JSON array (no markdown, no explanation):
 [
   {
     "id": 1,
     "question": "The database connection automatically retries 3 times on connection drop before raising an exception.",
     "target_files": ["db/client.py"],
-    "target_functions" ["connect_to_db" , "close_db"]
+    "target_functions": ["connect_to_db" , "close_db"]
   }
 ]
 </output_format>
