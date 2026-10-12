@@ -147,3 +147,12 @@ The Vite development server forwards `/api` requests to the backend.
 ## Current status
 
 FewQuestions is still an early experiment. The active-hypothesis approach is the core idea, and the implementation will continue to improve as we learn which kinds of hypotheses are most useful for developers.
+
+## You can use this approach without AI
+
+You do not need an AI model to explore a repository this way.
+
+Open a repository, get a basic understanding of its folders and entry points, then write down a few claims about how it works. Check the relevant files, trace the code, or run tests to confirm or reject each claim.
+
+FewQuestions simply helps you create the first set of hypotheses faster. You will need hypotheses created by your own mind later. 
+
