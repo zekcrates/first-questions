@@ -2,13 +2,10 @@
 
 FewQuestions helps you understand a codebase by giving you hypotheses to investigate.
 
-It is not a quiz. The AI creates 30–40 testable claims about the repository. Each claim may be true or false. Your goal is to inspect the code, run tests, and investigate until you can confirm or reject the hypothesis.
+The LLM creates some testable claims about the repository. Each claim may be true or false. Your goal is to inspect the code, run tests, and investigate until you can confirm or reject the hypothesis.
 
 ## Why this approach?
 
-Most codebase tools help you search, summarize, or get an answer to a question you already have. FewQuestions starts with something different: uncertainty.
-
-It gives you a claim that might be right or wrong and asks you to investigate it. The learning loop becomes:
 
 ```text
 hypothesis → inspect the code → run tests or trace the flow → confirm or reject it
